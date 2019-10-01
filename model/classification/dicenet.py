@@ -58,7 +58,7 @@ class CNNModel(nn.Module):
             channels_in = args.channels
         except:
             # if not specified, default to RGB (3)
-            channels_in = 10
+            channels_in = 70
 
         width = args.model_width
         height = args.model_height
@@ -190,12 +190,12 @@ if __name__ == '__main__':
             #args.num_classes = 1000
             imSz = size
             args.s = scale
-            args.channels = 10
+            args.channels = args.channels
             args.model_width = 96
             args.model_height = 96
 
             model = CNNModel(args)
-            input = torch.randn(1, 10, size, size)
+            input = torch.randn(1, args.channels, size, size)
             print_info_message('Scale: {}, ImSize: {}'.format(scale, size))
             print_info_message('Flops: {:.2f} million'.format(compute_flops(model, input)))
             print_info_message('Params: {:.2f} million'.format(model_parameters(model)))

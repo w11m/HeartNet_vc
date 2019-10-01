@@ -56,7 +56,7 @@ function to compute flops
 '''
 def compute_flops(model, input=None):
     from utilities.flops_compute import add_flops_counting_methods
-    input = input if input is not None else torch.Tensor(1, 10, 96, 96)
+    input = input if input is not None else torch.Tensor(1, 70, 96, 96)
     model = add_flops_counting_methods(model)
     model.eval()
     model.start_flops_count()

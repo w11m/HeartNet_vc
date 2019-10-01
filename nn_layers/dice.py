@@ -1,7 +1,7 @@
-#============================================
+# ============================================
 __author__ = "Sachin Mehta"
 __maintainer__ = "Sachin Mehta"
-#============================================
+# ============================================
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -13,6 +13,7 @@ class DICE(nn.Module):
     '''
     This class implements the volume-wise seperable convolutions
     '''
+
     def __init__(self, channel_in, channel_out, height, width, kernel_size=7, dilation=[1, 1, 1], shuffle=True):
         print('kernel_size ={}'.format(kernel_size))
         '''
@@ -26,18 +27,30 @@ class DICE(nn.Module):
         '''
         super().__init__()
         assert len(dilation) == 3
-        padding_1 = int((kernel_size - 1) / 2) *dilation[0]
-        padding_2 = int((kernel_size - 1) / 2) *dilation[1]
-        padding_3 = int((kernel_size - 1) / 2) *dilation[2]
-        self.conv_channel = nn.Conv2d(channel_in, channel_in, kernel_size=kernel_size, stride=1, groups=channel_in,
-                                      padding=padding_1, bias=False, dilation=dilation[0])
-        self.conv_width = nn.Conv2d(width, width, kernel_size=kernel_size, stride=1, groups=width,
-                               padding=padding_2, bias=False, dilation=dilation[1])
-        self.conv_height = nn.Conv2d(height, height, kernel_size=kernel_size, stride=1, groups=height,
-                               padding=padding_3, bias=False, dilation=dilation[2])
+        if isinstance(kernel_size, int):
+            padding_1_h = int((kernel_size - 1) / 2) * dilation[0]
+            padding_1_w = int((kernel_size - 1) / 2) * dilation[0]
+            padding_2_h = int((kernel_size - 1) / 2) * dilation[1]
+            padding_2_w = int((kernel_size - 1) / 2) * dilation[1]
+            padding_3_h = int((kernel_size - 1) / 2) * dilation[2]
+            padding_3_w = int((kernel_size - 1) / 2) * dilation[2]
+        elif isinstance(kernel_size, tuple):
+            padding_1_h = int((kernel_size[0] - 1) / 2) * dilation[0]
+            padding_1_w = int((kernel_size[1] - 1) / 2) * dilation[0]
+            padding_2_h = int((kernel_size[0] - 1) / 2) * dilation[1]
+            padding_2_w = int((kernel_size[1] - 1) / 2) * dilation[1]
+            padding_3_h = int((kernel_size[0] - 1) / 2) * dilation[2]
+            padding_3_w = int((kernel_size[1] - 1) / 2) * dilation[2]
 
-        self.br_act = BR(3*channel_in)
-        self.weight_avg_layer = CBR(3*channel_in, channel_in, kSize=1, stride=1, groups=channel_in)
+        self.conv_channel = nn.Conv2d(channel_in, channel_in, kernel_size=kernel_size, stride=1, groups=channel_in,
+                                      padding=(padding_1_h,padding_1_w), bias=False, dilation=dilation[0])
+        self.conv_width = nn.Conv2d(width, width, kernel_size=kernel_size, stride=1, groups=width,
+                                    padding=(padding_2_h,padding_2_w), bias=False, dilation=dilation[1])
+        self.conv_height = nn.Conv2d(height, height, kernel_size=kernel_size, stride=1, groups=height,
+                                     padding=(padding_3_h,padding_3_w), bias=False, dilation=dilation[2])
+
+        self.br_act = BR(3 * channel_in)
+        self.weight_avg_layer = CBR(3 * channel_in, channel_in, kSize=1, stride=1, groups=channel_in)
 
         # project from channel_in to Channel_out
         groups_proj = math.gcd(channel_in, channel_out)
@@ -46,7 +59,7 @@ class DICE(nn.Module):
             nn.AdaptiveAvgPool2d(output_size=1),
             nn.Conv2d(channel_in, channel_in // 4, kernel_size=1, bias=False),
             nn.ReLU(inplace=True),
-            nn.Conv2d(channel_in //4, channel_out, kernel_size=1, bias=False),
+            nn.Conv2d(channel_in // 4, channel_out, kernel_size=1, bias=False),
             nn.Sigmoid()
         )
 
@@ -57,7 +70,7 @@ class DICE(nn.Module):
         self.channel_in = channel_in
         self.channel_out = channel_out
         self.shuffle = shuffle
-        self.ksize=kernel_size
+        self.ksize = kernel_size
         self.dilation = dilation
 
     def forward(self, x):
@@ -124,7 +137,8 @@ class StridedDICE(nn.Module):
     '''
     This class implements the strided volume-wise seperable convolutions
     '''
-    def __init__(self, channel_in, height, width, kernel_size=7, dilation=[1,1,1], shuffle=True):
+
+    def __init__(self, channel_in, height, width, kernel_size=7, dilation=[1, 1, 1], shuffle=True):
         '''
         :param channel_in: # of input channels
         :param channel_out: # of output channels
@@ -140,7 +154,7 @@ class StridedDICE(nn.Module):
         self.left_layer = nn.Sequential(CBR(channel_in, channel_in, 3, stride=2, groups=channel_in),
                                         CBR(channel_in, channel_in, 1, 1)
                                         )
-        self.right_layer =  nn.Sequential(
+        self.right_layer = nn.Sequential(
             nn.AvgPool2d(kernel_size=3, padding=1, stride=2),
             DICE(channel_in, channel_in, height, width, kernel_size=kernel_size, dilation=dilation,
                  shuffle=shuffle),
@@ -151,7 +165,7 @@ class StridedDICE(nn.Module):
         self.width = width
         self.height = height
         self.channel_in = channel_in
-        self.channel_out = 2*channel_in
+        self.channel_out = 2 * channel_in
         self.ksize = kernel_size
 
     def forward(self, x):
@@ -165,9 +179,11 @@ class StridedDICE(nn.Module):
             'width={width}, height={height})'
         return s.format(name=self.__class__.__name__, **self.__dict__)
 
+
 if __name__ == '__main__':
     import numpy as np
-    channel_in = 10
+
+    channel_in = 70
     channel_out = 30
     width = 96
     height = 96

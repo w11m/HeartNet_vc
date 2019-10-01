@@ -75,7 +75,7 @@ def main(args):
         os.makedirs(args.savedir)
     writer = SummaryWriter(log_dir=args.savedir, comment='Training and Validation logs')
     try:
-        writer.add_graph(model, input_to_model=torch.randn(1, 10, args.inpSize, args.inpSize))
+        writer.add_graph(model, input_to_model=torch.randn(1, 70, args.inpSize, args.inpSize))
     except:
         print_log_message("Not able to generate the graph. Likely because your model is not supported by ONNX")
 
@@ -170,9 +170,9 @@ def main(args):
             return signals, gts
         ht_img_width, ht_img_height = args.inpSize, args.inpSize
         ht_batch_size = args.batch_size
-        signal_length = 10
-        signals_train, gts_train = loadData('./data_train/fps1_sample10_2D_train_sep.npy')
-        signals_val, gts_val = loadData('./data_train/fps1_sample10_2D_val_sep.npy')
+        signal_length = args.channels
+        signals_train, gts_train = loadData('../DiCENeT/CardioNet/data_train/fps7_sample10_2D_train.npy')
+        signals_val, gts_val = loadData('../DiCENeT/CardioNet/data_train/fps7_sample10_2D_val.npy')
         from data_loader.classification.heart import HeartDataGenerator
         heart_train_data = HeartDataGenerator(signals_train, gts_train, ht_batch_size)
         # heart_train_data.squeeze
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Training efficient networks')
     # General settings
     parser.add_argument('--workers', default=1, type=int, help='number of data loading workers (default: 4)')
-    parser.add_argument('--batch-size', default=2, type=int, help='mini-batch size (default: 512)')
+    parser.add_argument('--batch-size', default=1, type=int, help='mini-batch size (default: 512)')
 
     # Dataset related settings
     parser.add_argument('--data', default='', help='path to dataset')
@@ -299,10 +299,10 @@ if __name__ == '__main__':
                                                            'for increasing the dims while < 1 for decreasing)')
     parser.add_argument('--inpSize', default=96, type=int, help='Input image size (default: 224 x 224)')
     parser.add_argument('--scale', default=[0.2, 1.0], type=float, nargs="+", help='Scale for data augmentation')
-    parser.add_argument('--ksize', default=9, type=int,help='Kernel_size for convolution')
+    parser.add_argument('--ksize', default=(3,5) ,help='Kernel_size for convolution')
     parser.add_argument('--model', default='dicenet', choices=classification_models,
                         help='Which model? basic= basic CNN model, res=resnet style)')
-    parser.add_argument('--channels', default=10, type=int, help='Input channels')
+    parser.add_argument('--channels', default=70, type=int, help='Input channels')
     # DiceNet related settings
     parser.add_argument('--model-width', default=96, type=int, help='Model width')
     parser.add_argument('--model-height', default=96, type=int, help='Model height')
