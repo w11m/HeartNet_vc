@@ -305,7 +305,7 @@ if __name__ == '__main__':
                                                               'for increasing the dims while < 1 for decreasing)')
     parser.add_argument('--inpSize', default=96, type=int, help='Input image size (default: 224 x 224)')
     parser.add_argument('--scale', default=[0.2, 1.0], type=float, nargs="+", help='Scale for data augmentation')
-    parser.add_argument('--ksize', default=[3,5],type=int,nargs='+', help='Kernel_size for convolution')
+    parser.add_argument('--ksize', default=[3], type=int, nargs='+', help='Kernel_size for convolution')
     parser.add_argument('--model', default='dicenet', choices=classification_models,
                         help='Which model? basic= basic CNN model, res=resnet style)')
     parser.add_argument('--channels', default=70, type=int, help='Input channels')

@@ -16,6 +16,7 @@ class DICE(nn.Module):
 
     def __init__(self, channel_in, channel_out, height, width, kernel_size=7, dilation=[1, 1, 1], shuffle=True):
         print('kernel_size ={}'.format(kernel_size))
+        # print('kernel_size ={}'.format(len(kernel_size)))
         '''
         :param channel_in: # of input channels
         :param channel_out: # of output channels
@@ -30,14 +31,15 @@ class DICE(nn.Module):
         padding_1_h, padding_1_w, padding_2_h, padding_2_w, padding_3_h, padding_3_w = 0, 0, 0, 0, 0, 0
         global padding_1_h, padding_1_w, padding_2_h, padding_2_w, padding_3_h, padding_3_w
 
-        if isinstance(kernel_size, int):
-            padding_1_h = int((kernel_size - 1) / 2) * dilation[0]
-            padding_1_w = int((kernel_size - 1) / 2) * dilation[0]
-            padding_2_h = int((kernel_size - 1) / 2) * dilation[1]
-            padding_2_w = int((kernel_size - 1) / 2) * dilation[1]
-            padding_3_h = int((kernel_size - 1) / 2) * dilation[2]
-            padding_3_w = int((kernel_size - 1) / 2) * dilation[2]
-        elif isinstance(kernel_size, tuple):
+        if len(kernel_size) == 1:
+            padding_1_h = int((kernel_size[0] - 1) / 2) * dilation[0]
+            padding_1_w = int((kernel_size[0] - 1) / 2) * dilation[0]
+            padding_2_h = int((kernel_size[0] - 1) / 2) * dilation[1]
+            padding_2_w = int((kernel_size[0] - 1) / 2) * dilation[1]
+            padding_3_h = int((kernel_size[0] - 1) / 2) * dilation[2]
+            padding_3_w = int((kernel_size[0] - 1) / 2) * dilation[2]
+            kernel_size = kernel_size[0]
+        elif len(kernel_size) == 2:
             padding_1_h = int((kernel_size[0] - 1) / 2) * dilation[0]
             padding_1_w = int((kernel_size[1] - 1) / 2) * dilation[0]
             padding_2_h = int((kernel_size[0] - 1) / 2) * dilation[1]
