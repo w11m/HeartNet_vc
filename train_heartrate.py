@@ -19,6 +19,8 @@ from decimal import Decimal
 # ============================================
 __author__ = "Sachin Mehta"
 __maintainer__ = "Sachin Mehta"
+
+
 # ============================================
 
 
@@ -117,7 +119,7 @@ def main(args):
     elif args.dataset == 'coco':
         criterion = nn.BCEWithLogitsLoss()
         acc_metric = 'F1'
-    elif args.dataset =='Heart':
+    elif args.dataset == 'Heart':
         criterion = nn.L1Loss()
         acc_metric = 'Test'
     else:
@@ -163,11 +165,13 @@ def main(args):
             except:
                 data = np.load(npy_path)
             return data
+
         def loadData(data_path):
             npy_data = load_npy(data_path)
             signals = npy_data['signals']
             gts = npy_data['gts']
             return signals, gts
+
         ht_img_width, ht_img_height = args.inpSize, args.inpSize
         ht_batch_size = args.batch_size
         signal_length = args.channels
@@ -178,8 +182,10 @@ def main(args):
         # heart_train_data.squeeze
         heart_val_data = HeartDataGenerator(signals_val, gts_val, ht_batch_size)
         # heart_val_data.squeeze
-        train_loader = torch.utils.data.DataLoader(heart_train_data, batch_size=args.batch_size, shuffle=True,pin_memory=True, num_workers=args.workers)
-        val_loader = torch.utils.data.DataLoader(heart_val_data, batch_size=args.batch_size, shuffle=False,pin_memory=True, num_workers=args.workers)
+        train_loader = torch.utils.data.DataLoader(heart_train_data, batch_size=args.batch_size, shuffle=True,
+                                                   pin_memory=True, num_workers=args.workers)
+        val_loader = torch.utils.data.DataLoader(heart_val_data, batch_size=args.batch_size, shuffle=False,
+                                                 pin_memory=True, num_workers=args.workers)
 
     else:
         print_error_message('{} dataset not yet supported'.format(args.dataset))
@@ -296,10 +302,10 @@ if __name__ == '__main__':
 
     # Model settings
     parser.add_argument('--s', default=0.75, type=float, help='Factor by which output channels should be scaled (s > 1 '
-                                                           'for increasing the dims while < 1 for decreasing)')
+                                                              'for increasing the dims while < 1 for decreasing)')
     parser.add_argument('--inpSize', default=96, type=int, help='Input image size (default: 224 x 224)')
     parser.add_argument('--scale', default=[0.2, 1.0], type=float, nargs="+", help='Scale for data augmentation')
-    parser.add_argument('--ksize', default=(3,5) ,help='Kernel_size for convolution')
+    parser.add_argument('--ksize', default=[3,5],type=int,nargs='+', help='Kernel_size for convolution')
     parser.add_argument('--model', default='dicenet', choices=classification_models,
                         help='Which model? basic= basic CNN model, res=resnet style)')
     parser.add_argument('--channels', default=70, type=int, help='Input channels')
@@ -316,16 +322,18 @@ if __name__ == '__main__':
 
     assert len(args.scale) == 2
     args.scale = tuple(args.scale)
-
+    args.ksize = tuple(args.ksize)
     random.seed(1882)
     torch.manual_seed(1882)
     showlr = '%.e' % Decimal(args.lr)
     timestr = time.strftime("%Y%m%d-%H%M%S")
-    args.savedir = '{}_{}/model_{}_{}/aug_{}_{}/k{}_{}_s_{}_inp_{}_sch_{}/{}/'.format(args.savedir, args.exp_type, args.model,
-                                                                               args.dataset, args.scale[0],
-                                                                               args.scale[1],args.ksize,showlr,
-                                                                               args.s, args.inpSize, args.scheduler,
-                                                                               timestr)
+    args.savedir = '{}_{}/model_{}_{}/aug_{}_{}/k{}_{}_s_{}_inp_{}_sch_{}/{}/'.format(args.savedir, args.exp_type,
+                                                                                      args.model,
+                                                                                      args.dataset, args.scale[0],
+                                                                                      args.scale[1], args.ksize, showlr,
+                                                                                      args.s, args.inpSize,
+                                                                                      args.scheduler,
+                                                                                      timestr)
 
     # if you want to finetune ImageNet model on other dataset, say MS-COCO classification
     if args.finetune:
@@ -336,14 +344,13 @@ if __name__ == '__main__':
         assert weight_file_key in model_weight_map.keys(), '{} does not exist'.format(weight_file_key)
         args.weights_ft = model_weight_map[weight_file_key]
 
-
     if args.dataset == 'imagenet':
         args.num_classes = 1000
     elif args.dataset == 'coco':
         from data_loader.classification.coco import COCO_CLASS_LIST
+
         args.num_classes = len(COCO_CLASS_LIST)
     elif args.dataset == 'Heart':
         args.num_classes = 1
-    
 
     main(args)

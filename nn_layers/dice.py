@@ -27,6 +27,9 @@ class DICE(nn.Module):
         '''
         super().__init__()
         assert len(dilation) == 3
+        padding_1_h, padding_1_w, padding_2_h, padding_2_w, padding_3_h, padding_3_w = 0, 0, 0, 0, 0, 0
+        global padding_1_h, padding_1_w, padding_2_h, padding_2_w, padding_3_h, padding_3_w
+
         if isinstance(kernel_size, int):
             padding_1_h = int((kernel_size - 1) / 2) * dilation[0]
             padding_1_w = int((kernel_size - 1) / 2) * dilation[0]
@@ -43,11 +46,11 @@ class DICE(nn.Module):
             padding_3_w = int((kernel_size[1] - 1) / 2) * dilation[2]
 
         self.conv_channel = nn.Conv2d(channel_in, channel_in, kernel_size=kernel_size, stride=1, groups=channel_in,
-                                      padding=(padding_1_h,padding_1_w), bias=False, dilation=dilation[0])
+                                      padding=(padding_1_h, padding_1_w), bias=False, dilation=dilation[0])
         self.conv_width = nn.Conv2d(width, width, kernel_size=kernel_size, stride=1, groups=width,
-                                    padding=(padding_2_h,padding_2_w), bias=False, dilation=dilation[1])
+                                    padding=(padding_2_h, padding_2_w), bias=False, dilation=dilation[1])
         self.conv_height = nn.Conv2d(height, height, kernel_size=kernel_size, stride=1, groups=height,
-                                     padding=(padding_3_h,padding_3_w), bias=False, dilation=dilation[2])
+                                     padding=(padding_3_h, padding_3_w), bias=False, dilation=dilation[2])
 
         self.br_act = BR(3 * channel_in)
         self.weight_avg_layer = CBR(3 * channel_in, channel_in, kSize=1, stride=1, groups=channel_in)

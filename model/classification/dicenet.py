@@ -89,6 +89,7 @@ class CNNModel(nn.Module):
         width = int(width / 2)
         height = int(height / 2)
         level3 = nn.ModuleList()
+        tupleksize = tuple(args.ksize)
         level3.append(StridedDICE(channel_in=out_channel_map[1], height=height, width=width,kernel_size=args.ksize))
         for i in range(reps_at_each_level[1]):
             if i == 0:
